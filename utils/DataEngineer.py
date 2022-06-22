@@ -2,7 +2,7 @@
 from sklearn.preprocessing import label_binarize
 import pandas as pd
 from sklearn.impute import SimpleImputer
-
+import numpy as np
 class DataEngineer():
 
     def __init__(self, df):
@@ -17,7 +17,8 @@ class DataEngineer():
         print(columns_count)
 
     def drop_columns(self, columns_list):
-        self.df.drop(columns_list)
+        self.df = self.df.drop(columns_list, axis=1)
+
 
     def fill_none_data(self, flag, index):
         try:
@@ -25,16 +26,14 @@ class DataEngineer():
                 if flag == "ffill":
                     self.df[index] = self.df[index].fillna(method="ffill")
                 elif flag == "drop":
-                    self.df[index] = self.df[index].dropna(axis=0)
+                    self.df = self.df.dropna(axis=0, subset=[index], inplace=False)
                 elif flag == "zero":
                     self.df[index] = self.df[index].fillna(0)
                 elif flag == "bfill":
                     self.df[index] = self.df[index].fillna(method="bfill")
                 elif flag == "mid":
-                    imputer_mid = SimpleImputer(strategy='median')
-                    imputer_mid.fit(self.df[index].values)
-                    numeric_data = imputer_mid.transform(self.df[index].values)
-                    self.df[index].values = numeric_data
+                    imputer_mid = SimpleImputer(strategy="median")
+                    self.df[index] =imputer_mid.fit_transform(self.df[index].values.reshape(-1, 1))
             else:
                 raise ValueError
         except ValueError:
